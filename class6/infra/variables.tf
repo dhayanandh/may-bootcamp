@@ -44,3 +44,32 @@ variable "db_default_settings" {
     db_admin_username       = "postgres"
   }
 }
+
+
+# application details
+variable "tag" {
+  description = "value for the tag"
+  default     = "latest"
+}
+variable "container_name" {
+  default = "student-portal"
+}
+variable "container_port" {
+  description = "The port on which the container will listen"
+  default     = 8000
+}
+
+variable "student_portal_app_cpu" {
+  description = "The CPU units for the Flask app"
+  default     = 256
+}
+variable "student_portal_app_memory" {
+  description = "The memory in MiB for the Flask app"
+  default     = 512
+}
+
+variable "desired_container_count" {
+  description = "The number of desired containers for the ECS service"
+  default     = 2
+
+}

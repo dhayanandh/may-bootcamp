@@ -9,6 +9,10 @@ terraform {
       source  = "hashicorp/random"
       version = "3.5.1"
     }
+    template = {
+      source  = "hashicorp/template"
+      version = "2.2.0"
+    }
   }
 }
 
@@ -20,5 +24,13 @@ provider "aws" {
       email = "lvingdevops.com"
       repo  = "may-bootcamp"
     }
+  }
+}
+
+terraform {
+  backend "s3" {
+    bucket = "state-bucket-879381241087"
+    key    = "terraform-state"
+    region = "ap-south-1"
   }
 }

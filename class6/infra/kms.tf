@@ -3,12 +3,12 @@ resource "aws_kms_key" "rds_kms" {
   deletion_window_in_days = 7
 
   tags = {
-    Name        = "${var.environment}-rds-kms-key"
+    Name        = "${var.environment}-rds-kms-key-new"
     Environment = var.environment
   }
 }
 
 resource "aws_kms_alias" "rds_kms_alias" {
-  name          = "alias/${var.environment}-rds-kms-key"
+  name          = "alias/${var.environment}-rds-kms-key-new"
   target_key_id = aws_kms_key.rds_kms.id
 }
