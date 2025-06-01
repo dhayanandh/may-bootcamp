@@ -14,7 +14,7 @@
     "portMappings": [
       {
         "containerPort": ${container_port},
-        "hostPort": ${container_name},
+        "hostPort": ${container_port},
         "protocol": "tcp",
         "name": "flask",
         "appProtocol": "http"

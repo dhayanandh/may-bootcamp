@@ -22,7 +22,8 @@ resource "aws_vpc" "main" {
 
 # 2 private subnets
 resource "aws_subnet" "private_1" {
-  cidr_block        = "10.0.1.0/24"
+  # cidr_block        = "10.0.1.0/24"
+  cidr_block        = var.subnet_cidr["private_1"]
   availability_zone = var.zone1
   vpc_id            = aws_vpc.main.id
 
@@ -32,7 +33,8 @@ resource "aws_subnet" "private_1" {
 }
 
 resource "aws_subnet" "private_2" {
-  cidr_block        = "10.0.2.0/24"
+  # cidr_block        = "10.0.2.0/24"
+  cidr_block        = var.subnet_cidr["private_2"]
   availability_zone = var.zone2
   vpc_id            = aws_vpc.main.id
 
@@ -44,7 +46,8 @@ resource "aws_subnet" "private_2" {
 # 2 public subnets
 
 resource "aws_subnet" "public_1" {
-  cidr_block              = "10.0.3.0/24"
+  # cidr_block              = "10.0.3.0/24"
+  cidr_block              = var.subnet_cidr["public_1"]
   availability_zone       = var.zone1
   vpc_id                  = aws_vpc.main.id
   map_public_ip_on_launch = true
@@ -55,7 +58,8 @@ resource "aws_subnet" "public_1" {
 }
 
 resource "aws_subnet" "public_2" {
-  cidr_block              = "10.0.4.0/24"
+  # cidr_block              = "10.0.4.0/24"
+  cidr_block              = var.subnet_cidr["public_2"]
   availability_zone       = var.zone2
   vpc_id                  = aws_vpc.main.id
   map_public_ip_on_launch = true
@@ -66,7 +70,8 @@ resource "aws_subnet" "public_2" {
 }
 # 2 private subnet for database
 resource "aws_subnet" "rds_1" {
-  cidr_block        = "10.0.5.0/24"
+  # cidr_block        = "10.0.5.0/24"
+  cidr_block        = var.subnet_cidr["db_subnet_1"]
   availability_zone = data.aws_availability_zones.available_zones.names[0]
   vpc_id            = aws_vpc.main.id
 
@@ -76,7 +81,8 @@ resource "aws_subnet" "rds_1" {
 }
 
 resource "aws_subnet" "rds_2" {
-  cidr_block        = "10.0.6.0/24"
+  # cidr_block        = "10.0.6.0/24"
+  cidr_block        = var.subnet_cidr["db_subnet_2"]
   availability_zone = data.aws_availability_zones.available_zones.names[1]
   vpc_id            = aws_vpc.main.id
 

@@ -1,11 +1,6 @@
-name: class6 Terraform deploy 
+name: class6-7-8 Terraform destroy 
 
 on:
-  push:
-    branches:
-      - main
-    paths:
-      - 'class6/infra/**'
   workflow_dispatch:
 
 jobs:
@@ -34,4 +29,4 @@ jobs:
 
       - name: Terraform Apply
         working-directory: ${{ env.TERRAFORM_PATH }}
-        run: terraform apply  -auto-approve
+        run: terraform destroy  -auto-approve

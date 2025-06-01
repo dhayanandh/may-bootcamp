@@ -27,7 +27,7 @@ resource "aws_ecs_cluster" "main" {
 
 # json file
 data "template_file" "services" {
-  template = file("${path.module}/templates/student-portan.tpl")
+  template = file("${path.module}/templates/student-portal.tpl")
   vars     = local.student_portals_services_vars
 }
 
