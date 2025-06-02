@@ -12,13 +12,12 @@ locals {
   }
 
   app_deploy_vars = {
-    AWS_REGION             = var.region
-    APP_ENVIRONMENT        = var.environment
     IMAGE_REPO_NAME        = aws_ecr_repository.student_portal_app.repository_url
     ECS_APP_CONTAINER_NAME = var.container_name
     ECS_TASK_DEFINITION    = "${var.environment}-${var.app_name}"
     ECS_SERVICE            = "${var.environment}-${var.app_name}-service"
     ECS_CLUSTER            = aws_ecs_cluster.main.id
+    IMAGE_NAME             = "student-portal-app"
   }
 }
 
