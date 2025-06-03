@@ -1,0 +1,9 @@
+name: gitflow test
+on: push
+
+jobs: 
+  gitflow test:
+    runs-on: ubuntu-latest
+    steps:
+    - name: Hay Machi
+      run: echo "hay Machi"
