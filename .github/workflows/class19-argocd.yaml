@@ -65,9 +65,9 @@ jobs:
     - name: Build and push Docker image
       uses: docker/build-push-action@v5
       with:
-        context: ./class19/src  # Fixed: Added proper context path
+        context: ./class19/src
         file: ./class19/src/Dockerfile
-        platforms: linux/amd64
+        platforms: linux/amd64,linux/arm64  # Support both architectures
         push: true
         tags: |
           ${{ env.ECR_REGISTRY }}/${{ env.ECR_REPOSITORY }}:${{ steps.image-tag.outputs.image_tag }}
@@ -99,10 +99,10 @@ jobs:
         IMAGE_TAG="${{ steps.image-tag.outputs.image_tag }}"
         FULL_IMAGE="${{ env.ECR_REGISTRY }}/${{ env.ECR_REPOSITORY }}:${IMAGE_TAG}"
         
-        # Update the deployment file (fixed the file path and sed command)
+        # Update the deployment file
         sed -i "s|image: .*|image: ${FULL_IMAGE}|g" class19/k8s/app.yaml
         
-        # Commit and push changes (fixed branch name)
+        # Commit and push changes
         git add class19/k8s/app.yaml
         git commit -m "Update image tag to ${IMAGE_TAG} from commit ${{ github.sha }}" || exit 0
         git push origin argo-class19
