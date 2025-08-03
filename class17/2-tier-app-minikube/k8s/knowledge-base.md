@@ -47,4 +47,4 @@ db pass word : admin1234
 
 dbname: mydb
 
-db_link: 'postgresql://postgres:admin1234@student-portal.cvik8accw2tk.ap-south-1.rds.amazonaws.com:5432/mydb
+db_link:    'postgresql://postgres:admin1234@student-portal.cvik8accw2tk.ap-south-1.rds.amazonaws.com:5432/mydb'

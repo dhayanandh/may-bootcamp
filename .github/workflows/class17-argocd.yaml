@@ -1,0 +1,122 @@
+# .github/workflows/deploy-to-k8s.yml
+name: Build and Deploy to Kubernetes
+
+on:
+  # push:
+  #   branches: [ main, develop ]  # Trigger on main or develop branch
+  #   paths:
+  #     - 'src/**'  # Only trigger when source code changes
+  workflow_dispatch:  # Allow manual trigger from GitHub Actions UI
+
+env:
+  AWS_REGION: ap-south-1
+  ECR_REPOSITORY: student-portal
+  ECR_REGISTRY: 366140438193.dkr.ecr.ap-south-1.amazonaws.com
+
+jobs:
+  build-and-deploy:
+    name: Build and Deploy
+    runs-on: ubuntu-latest
+    
+    steps:
+    # Checkout the source code
+    - name: Checkout code
+      uses: actions/checkout@v4
+      with:
+        fetch-depth: 0  # Fetch full history for proper versioning
+
+    # Setup Docker Buildx
+    - name: Set up Docker Buildx
+      uses: docker/setup-buildx-action@v3
+
+    # Configure AWS credentials
+    - name: Configure AWS credentials
+      uses: aws-actions/configure-aws-credentials@v4
+      with:
+        aws-access-key-id: ${{ secrets.AWS_ACCESS_KEY_ID }}
+        aws-secret-access-key: ${{ secrets.AWS_SECRET_ACCESS_KEY }}
+        aws-region: ${{ env.AWS_REGION }}
+
+    # Login to Amazon ECR
+    - name: Login to Amazon ECR
+      id: login-ecr
+      uses: aws-actions/amazon-ecr-login@v2
+
+    # Generate image tag based on git commit
+    - name: Generate image tag
+      id: image-tag
+      run: |
+        # Use branch name and short commit SHA for tagging
+        BRANCH_NAME=${GITHUB_REF#refs/heads/}
+        SHORT_SHA=${GITHUB_SHA::8}
+        
+        if [ "$BRANCH_NAME" = "main" ]; then
+          IMAGE_TAG="v$(date +%Y%m%d)-${SHORT_SHA}"
+        else
+          IMAGE_TAG="${BRANCH_NAME}-${SHORT_SHA}"
+        fi
+        
+        echo "image_tag=${IMAGE_TAG}" >> $GITHUB_OUTPUT
+        echo "branch_name=${BRANCH_NAME}" >> $GITHUB_OUTPUT
+        echo "Generated image tag: ${IMAGE_TAG}"
+
+    # Build and push Docker image
+    - name: Build and push Docker image
+      uses: docker/build-push-action@v5
+      with:
+        context: ./src
+        file: ./src/Dockerfile
+        platforms: linux/amd64
+        push: true
+        tags: |
+          ${{ env.ECR_REGISTRY }}/${{ env.ECR_REPOSITORY }}:${{ steps.image-tag.outputs.image_tag }}
+          ${{ env.ECR_REGISTRY }}/${{ env.ECR_REPOSITORY }}:latest
+        cache-from: type=gha
+        cache-to: type=gha,mode=max
+
+    # Update ArgoCD manifests
+    - name: Update ArgoCD configuration
+      if: success()
+      run: |
+        # Configure git
+        git config --global user.name "github-actions[bot]"
+        git config --global user.email "github-actions[bot]@users.noreply.github.com"
+        
+        # Clone the repository with the argo-dev branch
+        git fetch origin argo-dev:argo-dev || git checkout -b argo-dev
+        git checkout argo-dev
+        
+        # Update the image tag in the deployment file
+        IMAGE_TAG="${{ steps.image-tag.outputs.image_tag }}"
+        FULL_IMAGE="${{ env.ECR_REGISTRY }}/${{ env.ECR_REPOSITORY }}:${IMAGE_TAG}"
+        
+        # Update exercise5 deployment file
+        sed -i "s|image: .*|image: ${FULL_IMAGE}|g" k8s/exercise5/app_deployment.yaml
+        
+        # Commit and push changes
+        git add k8s/exercise5/app_deployment.yaml
+        git commit -m "Update image tag to ${IMAGE_TAG} from commit ${{ github.sha }}" || exit 0
+        git push origin argo-dev
+
+    # Create deployment summary
+    - name: Deployment Summary
+      if: success()
+      run: |
+        echo "## 🚀 Deployment Summary" >> $GITHUB_STEP_SUMMARY
+        echo "| Field | Value |" >> $GITHUB_STEP_SUMMARY
+        echo "|-------|-------|" >> $GITHUB_STEP_SUMMARY
+        echo "| **Image Tag** | \`${{ steps.image-tag.outputs.image_tag }}\` |" >> $GITHUB_STEP_SUMMARY
+        echo "| **Full Image** | \`${{ env.ECR_REGISTRY }}/${{ env.ECR_REPOSITORY }}:${{ steps.image-tag.outputs.image_tag }}\` |" >> $GITHUB_STEP_SUMMARY
+        echo "| **Branch** | \`${{ steps.image-tag.outputs.branch_name }}\` |" >> $GITHUB_STEP_SUMMARY
+        echo "| **Commit** | \`${{ github.sha }}\` |" >> $GITHUB_STEP_SUMMARY
+        echo "| **ArgoCD Branch** | \`argo-dev\` |" >> $GITHUB_STEP_SUMMARY
+        echo "" >> $GITHUB_STEP_SUMMARY
+        echo "✅ Image built and pushed successfully!" >> $GITHUB_STEP_SUMMARY
+        echo "✅ ArgoCD configuration updated on argo-dev branch!" >> $GITHUB_STEP_SUMMARY
+
+    # Notify deployment status
+    - name: Deployment notification
+      if: failure()
+      run: |
+        echo "## ❌ Deployment Failed" >> $GITHUB_STEP_SUMMARY
+        echo "The deployment process encountered an error. Please check the logs above." >> $GITHUB_STEP_SUMMARY
