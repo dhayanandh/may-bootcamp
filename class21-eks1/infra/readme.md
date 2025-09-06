@@ -4,6 +4,10 @@ terraform plan
 
 Terraform apply -> this will deploy the cluster
 
+first aply will get stuck on managed node group creation 
+-> add the addon VPC-cni manually 
+-> the apply will complete
+
 
 # configure cluste access
 
