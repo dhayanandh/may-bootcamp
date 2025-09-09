@@ -11,3 +11,4 @@ spec:
     kind: ClusterIssuer
   dnsNames:
   - "akhileshmishra.tech" # replace with your domain name
+  - "app.akhileshmishra.tech" # replace with your domain name

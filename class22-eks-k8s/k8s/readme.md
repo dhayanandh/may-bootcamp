@@ -182,22 +182,22 @@ The AWS Application Load Balancer (ALB) Ingress Controller is required for the i
 ```bash
 
 # resource: https://docs.aws.amazon.com/eks/latest/userguide/enable-iam-roles-for-service-accounts.html
-export cluster_name=Akhilesh-cluster
-oidc_id=$(aws eks describe-cluster --name $cluster_name --query "cluster.identity.oidc.issuer" --output text | cut -d '/' -f 5)
+export cluster_name=may25-dev-cluster
+export oidc_id=$(aws eks describe-cluster --name $cluster_name --query "cluster.identity.oidc.issuer" --output text | cut -d '/' -f 5)
 echo $oidc_id
 # Check if IAM OIDC provider with your cluster’s issuer ID 
-aws iam list-open-id-connect-providers | grep $oidc_id | cut -d "/" -f4
+aws iam list-open-id-connect-providers --output json| grep $oidc_id | cut -d "/" -f4
 
-# If not, create
+# # If not, create
 eksctl utils associate-iam-oidc-provider --cluster $cluster_name --approve
 
-# or use console
--> To create a provider, go to IAM, choose Add provider.
--> For Provider type, select OpenID Connect.
--> For Provider URL, enter the OIDC provider URL for your cluster.
--> For Audience, enter sts.amazonaws.com.
--> (Optional) Add any tags, for example a tag to identify which cluster is for this provider.
--> Choose Add provider.
+# # or use console
+# -> To create a provider, go to IAM, choose Add provider.
+# -> For Provider type, select OpenID Connect.
+# -> For Provider URL, enter the OIDC provider URL for your cluster.
+# -> For Audience, enter sts.amazonaws.com.
+# -> (Optional) Add any tags, for example a tag to identify which cluster is for this provider.
+# -> Choose Add provider.
 
 # IAM policy for loadbalancder controller -> You only need to create an IAM Role for the AWS Load Balancer Controller once per AWS # account. Check if AmazonEKSLoadBalancerControllerRole 
 # Resource https://docs.aws.amazon.com/eks/latest/userguide/lbc-helm.html
@@ -207,12 +207,14 @@ aws iam create-policy \
     --policy-name AWSLoadBalancerControllerIAMPolicy \
     --policy-document file://iam_policy.json
 
+# create the role AmazonEKSLoadBalancerControllerRole with the above policy
+
 eksctl create iamserviceaccount \
   --cluster=$cluster_name \
   --namespace=kube-system \
   --name=aws-load-balancer-controller \
-  --role-name AmazonEKSLoadBalancerControllerRole \
-  --attach-policy-arn=arn:aws:iam::163962798700:policy/AWSLoadBalancerControllerIAMPolicy \
+  --role-name AmazonEKSLoadBalancerControllerRolek8s \
+  --attach-policy-arn=arn:aws:iam::879381241087:policy/AWSLoadBalancerControllerIAMPolicy \
   --approve
 
 # Install the AWS Load Balancer Controller
@@ -222,7 +224,7 @@ kubectl apply -k "github.com/aws/eks-charts/stable/aws-load-balancer-controller/
 brew install helm # (for mac)
 helm repo add eks https://aws.github.io/eks-charts
 helm repo update
-VPC_ID=$(aws eks describe-cluster --name Akhilesh-cluster --region eu-west-1 --query "cluster.resourcesVpcConfig.vpcId" --output text)
+VPC_ID=$(aws eks describe-cluster --name may25-dev-cluster --region ap-south-1 --query "cluster.resourcesVpcConfig.vpcId" --output text)
 
 helm install aws-load-balancer-controller eks/aws-load-balancer-controller \
   -n kube-system \
@@ -230,7 +232,7 @@ helm install aws-load-balancer-controller eks/aws-load-balancer-controller \
   --set serviceAccount.create=false \
   --set serviceAccount.name=aws-load-balancer-controller \
   --set $VPC_ID \
-  --set region=eu-west-1
+  --set region=ap-south-1
 
 ```
 
@@ -245,10 +247,18 @@ kubectl get ingress -n 3-tier-app-eks
 kubectl logs -n kube-system -l app.kubernetes.io/name=aws-load-balancer-controller
 
 # VPC_ID for cluster
-VPC_ID=$(aws eks describe-cluster --name Akhilesh-cluster --region eu-west-1 --query "cluster.resourcesVpcConfig.vpcId" --output text)
+VPC_ID=$(aws eks describe-cluster --name may25-dev-cluster --region ap-south-1 --query "cluster.resourcesVpcConfig.vpcId" --output text)
 
 # verify the vpc id
 echo $VPC_ID
+
+helm install aws-load-balancer-controller eks/aws-load-balancer-controller \
+  -n kube-system \
+  --set clusterName=$cluster_name \
+  --set serviceAccount.create=false \
+  --set serviceAccount.name=aws-load-balancer-controller \
+  --set vpcId=$VPC_ID \
+  --set region=ap-south-1
 
 # Public subnets for the cluster
 aws ec2 describe-subnets --filters "Name=vpc-id,Values=$VPC_ID" "Name=map-public-ip-on-launch,Values=true" \

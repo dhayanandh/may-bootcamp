@@ -16,5 +16,5 @@ spec:
           - "akhileshmishra.tech"  # Replace with your domain
       dns01:
         route53:
-          region: eu-west-1  # Replace with your AWS region
-          hostedZoneID: Z01413951IGBQK205UJ2J  # From Step 5
+          region: ap-south-1  # Replace with your AWS region
+          hostedZoneID: Z031876418L4DSANPX6H2  # From Step 5
