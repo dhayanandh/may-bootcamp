@@ -16,6 +16,12 @@ This guide covers managing Kubernetes contexts and EKS clusters using kubectl an
 ### Basic Context Operations
 
 ```bash
+
+# add the cluster to config
+aws eks update-kubeconfig --name <cluster-name> --region <region>
+
+aws eks update-kubeconfig --name may25-dev-cluster --region ap-south-1
+
 # List all contexts
 kubectl config get-contexts
 
