@@ -35,3 +35,11 @@ variable "db_default_settings" {
   }
 }
 
+
+variable "craft_namespace" {
+  description = "Craftista Namespace"
+  type        = string
+  default     = "craftista"
+  
+}
+

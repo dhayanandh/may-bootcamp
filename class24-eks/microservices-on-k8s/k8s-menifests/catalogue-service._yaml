@@ -1,27 +1,27 @@
-apiVersion: v1
-kind: ConfigMap
-metadata:
-  name: catalogue-config
-data:
-  app_version: "1.0.0"  # Added as a top-level key
-  config.json: |
-    {
-      "app_version": "1.0.0",
-      "data_source": "db"
-    }
-  db-config.properties: |
-    db_name=craftdb
-    db_host=craftdb.cfykukwcw419.ap-south-1.rds.amazonaws.com
----
-apiVersion: v1
-kind: Secret
-metadata:
-  name: catalogue-db-secrets
-type: Opaque
-data:
-  # Base64 encoded values - replace with actual encoded values
-  db_user: ZGV2b3Bz    # 'devops' in base64
-  db_password: ZGV2b3Bz # 'devops' in base64
+# apiVersion: v1
+# kind: ConfigMap
+# metadata:
+#   name: catalogue-config
+# data:
+#   app_version: "1.0.0"  # Added as a top-level key
+#   config.json: |
+#     {
+#       "app_version": "1.0.0",
+#       "data_source": "db"
+#     }
+#   db-config.properties: |
+#     db_name=catalougedb
+#     db_host=microservices-db.cfykukwcw419.ap-south-1.rds.amazonaws.com
+# ---
+# apiVersion: v1
+# kind: Secret
+# metadata:
+#   name: catalogue-db-secrets
+# type: Opaque
+# data:
+#   # Base64 encoded values - replace with actual encoded values
+#   db_user: ZGV2b3Bz    # 'devops' in base64
+#   db_password: ZGV2b3Bz # 'devops' in base64
 ---
 apiVersion: apps/v1
 kind: Deployment
@@ -67,7 +67,7 @@ spec:
         - name: AWS_REGION
           value: "ap-south-1"
         - name: DB_SECRET
-          value: "db/craftdb"
+          value: "app/microservices"
         - name: AWS_ACCESS_KEY_ID
           valueFrom:
             secretKeyRef:
@@ -80,8 +80,8 @@ spec:
               key: aws_secret_access_key
       containers:
       - name: catalogue-service
-        image: my/craftista-catalogue:dev
-        imagePullPolicy: Never # for locally building image
+        image: livingdevopswithakhilesh/microservices:catalogue-644625f8de627843afd6fc916bc30459705c2726
+        imagePullPolicy: Always 
         ports:
         - containerPort: 5000
         env:

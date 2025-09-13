@@ -10,7 +10,7 @@ data:
       "productsApiBaseUri": "http://catalogue:5000",
       "recommendationBaseUri": "http://recco:8080",
       "votingBaseUri": "http://voting:8080"
-    }
+    } 
 ---
 apiVersion: apps/v1
 kind: Deployment
@@ -75,3 +75,4 @@ spec:
   - port: 80
     targetPort: 3000
   type: ClusterIP
+

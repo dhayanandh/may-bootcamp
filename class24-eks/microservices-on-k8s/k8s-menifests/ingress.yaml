@@ -5,9 +5,17 @@ metadata:
   namespace: craftista
   annotations:
     nginx.ingress.kubernetes.io/rewrite-target: /
+    # Create an internet-facing ALB (public access)
+    alb.ingress.kubernetes.io/scheme: "internet-facing"
+    # Use IP mode for better compatibility with Fargate and pod networking
+    alb.ingress.kubernetes.io/target-type: "ip"
+    # Health check path - ALB will check this endpoint for service health
+    alb.ingress.kubernetes.io/healthcheck-path: "/"
+    # Listen only on port 80 (HTTP) - no SSL in this configuration
+    alb.ingress.kubernetes.io/listen-ports: '[{"HTTP":80}]'
 spec:
   rules:
-  - host: craftista.local  # We'll map this in /etc/hosts
+  - host: ms.akhileshmishra.tech  # We'll map this in /etc/hosts
     http:
       paths:
       - path: /
