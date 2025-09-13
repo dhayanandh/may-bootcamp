@@ -1,21 +1,17 @@
-networks:
-  craftista:
-    driver: bridge
-
 services:
   frontend:
     image: livingdevopswithakhilesh/craftista:frontend-9ce2a27f66c068ec12c2b0d14cf79014686d2cad
     build:
       context: ./frontend
     ports:
-      - "8080:3000"
+      - "8040:3000"
     networks:
       - craftista
 
   catalogue:
     image: livingdevopswithakhilesh/craftista:catalogue-9ce2a27f66c068ec12c2b0d14cf79014686d2cad
     ports:
-      - "50:5000"
+      - "5050:5000"
     networks:
       - craftista
 
@@ -31,7 +27,7 @@ services:
   recco:
     image: livingdevopswithakhilesh/craftista:recommendation-9ce2a27f66c068ec12c2b0d14cf79014686d2cad
     ports:
-      - "8080:8080"
+      - "8030:8080"
     networks:
       - craftista
 
@@ -46,3 +42,5 @@ services:
     networks:
       - craftista
 
+networks:
+  craftista:
